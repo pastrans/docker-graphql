@@ -38,8 +38,11 @@ jobs:
       env:
         NEW_VERSION: ${{ steps.version.outputs.version }}
       run: |
-        docker build -t pastrans/docker-grahql:$NEW_VERSION .
-        docker build -t pastrans/docker-grahql:lastest .
+        docker buildx create --name mybuilder --bootstrap --use
+        docker buildx use mybuilder 
+        docker buildx ls
+        docker buildx build  -t pastrans/docker-grahql:$NEW_VERSION .
+        docker buildx build  -t pastrans/docker-grahql:lastest .
     
     - name: Push Docker Image
       env:
