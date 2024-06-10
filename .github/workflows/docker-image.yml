@@ -40,8 +40,8 @@ jobs:
       run: |
         docker buildx create --name mybuilder --bootstrap --use
         docker buildx use mybuilder 
-        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t pastrans/docker-graphql:$NEW_VERSION .
-        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t pastrans/docker-graphql:latest .  
+        docker buildx build --platform linux/amd64,linux/arm64 --load -t pastrans/docker-graphql:$NEW_VERSION .
+        docker buildx build --platform linux/amd64,linux/arm64 --load -t pastrans/docker-graphql:latest .  
         docker image ls -a
     
     - name: Push Docker Image
