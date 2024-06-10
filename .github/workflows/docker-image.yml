@@ -46,12 +46,13 @@ jobs:
       uses: docker/build-push-action@v5
       env:
         NEW_VERSION: ${{ steps.version.outputs.version }}
-        with:
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: pastrans/docker-grahql:${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: pastrans/docker-grahql:${{ steps.version.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
 
     # - name: Build the Docker image
