@@ -17,7 +17,14 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    
+    - uses: docker/setup-qemu-action@v3
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/build-push-action@v5
+      with:
+            context: .
+            platforms: linux/amd64,linux/arm64
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
     - name: Git Semantic Version
       uses: PaulHatch/semantic-version@v4.0.3
       with:
@@ -25,35 +32,24 @@ jobs:
         minor_pattern: "feat:"
         format: "${major}.${minor}.${patch}-prerelease${increment}"
       id: version     #con esto tenemos acceso a todo el resultado del paso
-      
-    - name: Docker login
-      env: 
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        NEW_VERSION: ${{ steps.version.outputs.version }}
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
     
+    - uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
     - name: Build Docker Image 
+      uses: docker/build-push-action@v5
       env:
         NEW_VERSION: ${{ steps.version.outputs.version }}
-      run: |
-        docker buildx create --name mybuilder --bootstrap --use
-        docker buildx use mybuilder 
-        docker buildx build --output="type=image" --platform linux/amd64,linux/arm64 -t pastrans/docker-graphql:$NEW_VERSION .
-        docker buildx build --output="type=image" --platform linux/amd64,linux/arm64 -t pastrans/docker-graphql:latest .
-        docker image ls -a
-    
-    - name: Push Docker Image
-      env:
-        NEW_VERSION: ${{ steps.version.outputs.version }}
-      run: |
-        docker push pastrans/docker-graphql:$NEW_VERSION 
-        docker push pastrans/docker-graphql:latest 
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: pastrans/docker-grahql:${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
 
-
-
-    
     # - name: Build the Docker image
     #   run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
