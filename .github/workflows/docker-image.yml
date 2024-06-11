@@ -40,7 +40,7 @@ jobs:
     - name: Build Docker Image 
       uses: docker/build-push-action@v5
       env:
-      NEW_VERSION: ${{ steps.version.outputs.version }}
+        NEW_VERSION: ${{ steps.version.outputs.version }}
       with:
         context: .
         platforms: linux/amd64,linux/arm64
